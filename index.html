@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoC Chart.js - Registro de Parroquias</title>
+    <!--link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"-->
+    <link rel="stylesheet" href="bootstrap.min.css" type="text/css"/>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 50px;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">Distribución de Registros por Parroquia</h4>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="miGraficoPoC"></canvas>
+                    </div>
+                </div>
+                <div class="card-footer text-muted text-center">
+                    <small>Datos de prueba (Simulación de base de datos)</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--script src="https://cdn.jsdelivr.net/npm/chart.js"></!--script-->
+<script src="chart.js" type="text/javascript"></script>
+
+<script>
+    // 1. Definición de los datos (Lo que normalmente vendría de Django)
+    const etiquetas = [
+        "Arias",
+        "Sagrario",
+        "Milla",
+        "Jacinto Plaza", 
+        "Domingo Peña",
+        "El Llano",
+        "Los Nevados"
+    ];
+
+    const valores = [12, 19, 3, 5, 2, 3, 9];
+
+    // 2. Función para generar colores HSL dinámicos (Para evitar que se repitan)
+    const generarColores = (cantidad) => {
+        return etiquetas.map((_, i) => `hsl(${(i * 360) / cantidad}, 70%, 60%)`);
+    };
+
+    // 3. Configuración y Renderizado
+    const ctx = document.getElementById('miGraficoPoC').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'pie', // Puedes cambiarlo a 'bar' o 'doughnut'
+        data: {
+            labels: etiquetas,
+            datasets: [{
+                label: 'Número de Registros',
+                data: valores,
+                backgroundColor: generarColores(etiquetas.length),
+                borderColor: '#ffffff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        font: { size: 12, family: 'sans-serif' }
+                    }
+                },
+                tooltip: {
+                    enabled: true,
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const valor = context.raw;
+                            const porcentaje = ((valor / total) * 100).toFixed(1);
+                            return `${context.label}: ${valor} (${porcentaje}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>
